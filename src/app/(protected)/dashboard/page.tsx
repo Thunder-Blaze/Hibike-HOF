@@ -1,0 +1,13 @@
+import { getUserFromToken } from "@/lib/getUserFromToken";
+
+export default async function Dashboard() {
+  const address = await getUserFromToken();
+
+  if (!address) return <div>Unauthorized</div>;
+
+  return (
+    <main className="flex flex-col items-center justify-center min-h-screen">
+      <h1 className="text-2xl font-bold">Welcome, {address}</h1>
+    </main>
+  );
+}

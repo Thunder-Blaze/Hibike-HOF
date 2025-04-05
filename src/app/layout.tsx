@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { JetBrains_Mono, Inter } from "next/font/google";
 import AnimatedCursor from "react-animated-cursor";
 import { ThemeProvider } from "next-themes";
-import "./globals.css";
+import "@/styles/globals.css";
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrainsMono",
