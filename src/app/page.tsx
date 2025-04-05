@@ -1,103 +1,169 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import { ethers } from "ethers";
+import contractABI from "../contract_data/GetSet.json";
+import contractAddress from "../contract_data/GetSet-address.json";
+
+export default function Page() {
+  const [value, setValue] = useState(""); 
+  const [retrievedValue, setRetrievedValue] = useState(null);
+  const [account, setAccount] = useState(null);
+  const [provider, setProvider] = useState(null);
+  const [signer, setSigner] = useState(null);
+  const [contract, setContract] = useState(null);
+  const [depositAmount, setDepositAmount] = useState("");
+  const [userBalance, setUserBalance] = useState(null);
+
+  // Initialize Provider, Signer, and Contract
+  const initializeEthers = async () => {
+    if (!window.ethereum) {
+      alert("MetaMask not detected!");
+      return;
+    }
+    
+    try {
+      const _provider = new ethers.BrowserProvider(window.ethereum);
+      const _signer = await _provider.getSigner();
+      const _contract = new ethers.Contract(contractAddress.address, contractABI.abi, _signer);
+
+      setProvider(_provider);
+      setSigner(_signer);
+      setContract(_contract);
+
+      const accounts = await _provider.send("eth_requestAccounts", []);
+      setAccount(accounts[0]);
+    } catch (error) {
+      console.error("Error initializing ethers:", error);
+    }
+  };
+
+  // Set value in contract
+  const setContractValue = async () => {
+    if (!contract) return alert("Please connect wallet first!");
+    try {
+      const tx = await contract.set(BigInt(value)); // Convert string to BigInt
+      await tx.wait(); // Wait for transaction confirmation
+      alert("Value set successfully!");
+    } catch (error) {
+      console.error("Error setting value:", error);
+    }
+  };
+
+  // Get value from contract
+  const getContractValue = async () => {
+    if (!contract) return alert("Please connect wallet first!");
+    try {
+      const result = await contract.get();
+      setRetrievedValue(result.toString());
+    } catch (error) {
+      console.error("Error getting value:", error);
+    }
+  };
+
+  // Deposit funds to the contract
+  const depositFunds = async () => {
+    if (!contract) return alert("Please connect wallet first!");
+    try {
+      const tx = await signer.sendTransaction({
+        to: contractAddress.address,
+        value: ethers.parseEther(depositAmount), // Convert to wei
+      });
+      await tx.wait();
+      alert(`Deposited ${depositAmount} ETH successfully!`);
+      setDepositAmount("");
+    } catch (error) {
+      console.error("Error depositing funds:", error);
+    }
+  };
+
+  // Get user balance
+  const getUserBalance = async () => {
+    if (!contract) return alert("Please connect wallet first!");
+    try {
+      const balance = await contract.getBalance(account);
+      setUserBalance(ethers.formatEther(balance)); // Convert from wei to ETH
+    } catch (error) {
+      console.error("Error getting balance:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (window.ethereum) {
+      initializeEthers();
+    }
+  }, []);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">GetSet Contract</h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      {/* Wallet Connection */}
+      {account ? (
+        <p className="mb-4">Connected: {account}</p>
+      ) : (
+        <button 
+          onClick={initializeEthers} 
+          className="px-4 py-2 bg-blue-600 text-white rounded-md mb-4"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          Connect Wallet
+        </button>
+      )}
+
+      {/* Input Field for Setting Value */}
+      <input
+        type="number"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="Enter value"
+        className="border px-4 py-2 mb-4"
+      />
+      <button 
+        onClick={setContractValue} 
+        className="px-4 py-2 bg-green-600 text-white rounded-md mb-4"
+      >
+        Set Value
+      </button>
+
+      {/* Get Value Button */}
+      <button 
+        onClick={getContractValue} 
+        className="px-4 py-2 bg-purple-600 text-white rounded-md mb-4"
+      >
+        Get Value
+      </button>
+
+      {/* Display Retrieved Value */}
+      {retrievedValue !== null && (
+        <p className="text-lg font-bold">Stored Value: {retrievedValue}</p>
+      )}
+
+      {/* Deposit Funds */}
+      <input
+        type="text"
+        value={depositAmount}
+        onChange={(e) => setDepositAmount(e.target.value)}
+        placeholder="Enter ETH to deposit"
+        className="border px-4 py-2 mb-4"
+      />
+      <button 
+        onClick={depositFunds} 
+        className="px-4 py-2 bg-yellow-600 text-white rounded-md mb-4"
+      >
+        Deposit Funds
+      </button>
+
+      {/* Get User Balance */}
+      <button 
+        onClick={getUserBalance} 
+        className="px-4 py-2 bg-red-600 text-white rounded-md mb-4"
+      >
+        Get Balance
+      </button>
+
+      {userBalance !== null && (
+        <p className="text-lg font-bold">Your Balance: {userBalance} ETH</p>
+      )}
     </div>
   );
 }

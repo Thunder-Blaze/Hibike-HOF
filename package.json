@@ -3,12 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "hardhat:deploy": "npx hardhat run scripts/deploy.js --network localhost",
+    "hardhat:deploy:sepolia": "npx hardhat run scripts/deploy.js --network sepolia"
   },
   "dependencies": {
+    "dotenv": "^16.4.7",
     "@radix-ui/react-slot": "^1.1.2",
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
@@ -36,6 +41,8 @@
     "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
-    "@eslint/eslintrc": "^3"
+    "@eslint/eslintrc": "^3",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.19"
   }
 }
