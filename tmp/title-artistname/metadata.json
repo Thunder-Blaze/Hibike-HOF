@@ -1,22 +1,15 @@
 {
-  "version": "1.0.0",
-  "type": "music-track",
-  "title": "title",
-  "artistName": "artistName",
-  "artistAddress": "",
-  "description": "description",
-  "anime": "anime",
-  "genres": [
-    "lhgsd",
-    "akhda",
-    "ajksh"
-  ],
-  "tags": [
-    "jskedf",
-    "alskjd"
-  ],
-  "coverImageUrl": "cover.jpg",
-  "skinImageUrl": "",
-  "colorArray": [],
-  "timestamp": "2025-04-06T04:46:00.620Z"
+    "version": "1.0.0",
+    "type": "music-track",
+    "title": "title",
+    "artistName": "artistName",
+    "artistAddress": "",
+    "description": "description",
+    "anime": "anime",
+    "genres": ["lhgsd", "akhda", "ajksh"],
+    "tags": ["jskedf", "alskjd"],
+    "coverImageUrl": "cover.jpg",
+    "skinImageUrl": "",
+    "colorArray": [],
+    "timestamp": "2025-04-06T04:46:00.620Z"
 }

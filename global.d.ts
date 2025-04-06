@@ -1,8 +1,8 @@
 // global.d.ts
-export {};
+export {}
 
 declare global {
-  interface Window {
-    ethereum?: import("ethers").Eip1193Provider;
-  }
+    interface Window {
+        ethereum?: import('ethers').Eip1193Provider
+    }
 }

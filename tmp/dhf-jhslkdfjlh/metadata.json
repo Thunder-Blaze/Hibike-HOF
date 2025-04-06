@@ -1,1 +1,15 @@
-{"version":"1.0.0","type":"music-track","title":"dhf","artistName":"jhslkdfjlh","artistAddress":"","description":"jhsfh","anime":"hjkhdsfj","genres":["lhgsd","akhda","ajksh"],"tags":["jskedf","alskjd"],"coverImageUrl":"cover.jpg","skinImageUrl":"","colorArray":[],"timestamp":"2025-04-06T05:07:20.122Z"}
+{
+    "version": "1.0.0",
+    "type": "music-track",
+    "title": "dhf",
+    "artistName": "jhslkdfjlh",
+    "artistAddress": "",
+    "description": "jhsfh",
+    "anime": "hjkhdsfj",
+    "genres": ["lhgsd", "akhda", "ajksh"],
+    "tags": ["jskedf", "alskjd"],
+    "coverImageUrl": "cover.jpg",
+    "skinImageUrl": "",
+    "colorArray": [],
+    "timestamp": "2025-04-06T05:07:20.122Z"
+}
