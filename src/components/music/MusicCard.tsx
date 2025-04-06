@@ -9,6 +9,7 @@ interface MusicCardProps {
   isPlaying?: boolean
   onClick?: () => void
   className?: string
+  url: string
 }
 
 export function MusicCard({
@@ -18,14 +19,15 @@ export function MusicCard({
   isPlaying,
   onClick,
   className,
+  url
 }: MusicCardProps) {
   return (
-    <div
+    <a
       className={cn(
         'group relative overflow-hidden rounded-2xl bg-card transition-all hover:shadow-lg',
         className
       )}
-      onClick={onClick}
+      href={`/player/${url}`}
     >
       <div className="relative aspect-square w-full overflow-hidden">
         <Image
@@ -39,10 +41,10 @@ export function MusicCard({
           <Play className="h-6 w-6 text-primary-foreground" />
         </button>
       </div>
-      <div className="p-4">
+      <div className="p-4 absolute bottom-3 left-3 bg-background/50 rounded-lg" style={{width: 'calc(100% - 1.5rem)', backdropFilter: 'blur(10px)'}}>
         <h3 className="font-semibold leading-none tracking-tight">{title}</h3>
         <p className="text-sm text-muted-foreground">{artist}</p>
       </div>
-    </div>
+    </a>
   )
 } 

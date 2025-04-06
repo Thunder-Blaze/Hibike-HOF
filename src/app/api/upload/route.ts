@@ -1,82 +1,118 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
-import fsPromises from 'fs/promises'
+import fs from 'fs/promises'
 import path from 'path'
 import { uploadFolderToIPFS } from '@/lib/pinata'
 import { createMetadata } from '@/lib/metadata'
+import { nanoid } from 'nanoid'
 
-export const runtime = 'nodejs' // required for fs support in App Router
+export const runtime = 'nodejs'
+export const maxDuration = 60 // Set max duration to 60 seconds
 
 function sanitizeFileName(name: string): string {
     return name.replace(/[^a-z0-9_\-]/gi, '_').toLowerCase()
 }
 
+async function validateFile(file: File, type: 'audio' | 'image'): Promise<boolean> {
+    const allowedAudioTypes = ['audio/mpeg', 'audio/mp3']
+    const allowedImageTypes = ['image/jpeg', 'image/png']
+    const maxSizes = {
+        audio: 10 * 1024 * 1024, // 10MB
+        image: 2 * 1024 * 1024   // 2MB
+    }
+
+    if (type === 'audio' && !allowedAudioTypes.includes(file.type)) {
+        throw new Error('Invalid audio file type. Only MP3 files are allowed.')
+    }
+
+    if (type === 'image' && !allowedImageTypes.includes(file.type)) {
+        throw new Error('Invalid image file type. Only JPEG and PNG files are allowed.')
+    }
+
+    if (file.size > maxSizes[type]) {
+        throw new Error(`File size exceeds ${maxSizes[type] / (1024 * 1024)}MB limit.`)
+    }
+
+    return true
+}
+
 export async function POST(req: NextRequest) {
+    const tmpDir = path.join(process.cwd(), 'tmp')
+    const folderName = nanoid()
+    const folderPath = path.join(tmpDir, folderName)
+
     try {
         const formData = await req.formData()
 
-        const title = formData.get('title')?.toString() || 'untitled'
-        const artistName = formData.get('artistName')?.toString() || 'unknown'
-        const description = formData.get('description')?.toString() || ''
-        const anime = formData.get('anime')?.toString() || ''
-        const genres =
-            formData
-                .get('genres')
-                ?.toString()
-                .split(',')
-                .map((g) => g.trim()) || []
-        const tags =
-            formData
-                .get('tags')
-                ?.toString()
-                .split(',')
-                .map((t) => t.trim()) || []
+        // Validate required fields
+        const title = formData.get('title')?.toString()
+        const artistName = formData.get('artistName')?.toString()
+        const songFile = formData.get('songFile') as File | null
+        const coverImage = formData.get('coverImage') as File | null
 
-        const folderName = sanitizeFileName(`${title}-${artistName}`)
-        const folderPath = path.join(process.cwd(), 'tmp', folderName)
-        fs.mkdirSync(folderPath, { recursive: true })
+        if (!title || !artistName || !songFile || !coverImage) {
+            throw new Error('Missing required fields')
+        }
+
+        // Create temp directory if it doesn't exist
+        await fs.mkdir(tmpDir, { recursive: true })
+        await fs.mkdir(folderPath, { recursive: true })
+
+        // Validate and save files
+        await validateFile(songFile, 'audio')
+        await validateFile(coverImage, 'image')
 
         const saveFile = async (file: File, filename: string) => {
             const buffer = Buffer.from(await file.arrayBuffer())
             const filePath = path.join(folderPath, filename)
-            await fsPromises.writeFile(filePath, buffer)
+            await fs.writeFile(filePath, buffer)
+            return filePath
         }
 
-        const songFile = formData.get('songFile') as File | null
-        const coverImage = formData.get('coverImage') as File | null
+        // Save files
+        await Promise.all([
+            saveFile(songFile, 'song.mp3'),
+            saveFile(coverImage, 'cover.jpg')
+        ])
 
-        if (songFile) {
-            await saveFile(songFile, 'song.mp3')
-        }
-
-        if (coverImage) {
-            await saveFile(coverImage, 'cover.jpg')
-        }
-
+        // Create and save metadata
         const metadata = createMetadata({
             title,
             artistName,
             artistAddress: '',
-            description,
-            anime,
-            genres,
-            tags,
+            description: formData.get('description')?.toString() || '',
+            anime: formData.get('anime')?.toString() || '',
+            genres: formData.get('genres')?.toString()?.split(',').map(g => g.trim()) || [],
+            tags: formData.get('tags')?.toString()?.split(',').map(t => t.trim()) || [],
             coverImageUrl: 'cover.jpg',
             skinImageUrl: '',
             colorArray: [],
         })
 
-        await fsPromises.writeFile(
+        await fs.writeFile(
             path.join(folderPath, 'metadata.json'),
-            JSON.stringify(metadata),
+            JSON.stringify(metadata, null, 2),
             'utf-8'
         )
 
+        // Upload to IPFS
         const ipfsHash = await uploadFolderToIPFS(folderPath)
 
-        return NextResponse.json({ ipfsHash })
+        return NextResponse.json({ success: true, ipfsHash })
     } catch (err) {
-        console.error('Upload failed:', err)
-        return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+        // Cleanup temp folder in case of error
+        try {
+            await fs.rm(folderPath, { recursive: true, force: true })
+        } catch (cleanupErr) {
+            console.error('Cleanup error:', cleanupErr)
+        }
+
+        console.error('Upload error:', err)
+        return NextResponse.json(
+            { 
+                error: err instanceof Error ? err.message : 'Upload failed',
+                details: process.env.NODE_ENV === 'development' ? err : undefined
+            },
+            { status: 400 }
+        )
     }
 }

@@ -1,16 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { createMetadata } from '@/lib/metadata'
-import { uploadFolderToIPFS } from '@/lib/pinata'
-import { ethers } from 'ethers'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { useTheme } from "next-themes"
-import { Sun, Moon, Upload, Image, Music } from "lucide-react"
+import { Upload, Image, Music } from "lucide-react"
 
 export default function UploadPage() {
     const [title, setTitle] = useState('')
@@ -22,7 +18,6 @@ export default function UploadPage() {
     const [songFile, setSongFile] = useState<File | null>(null)
     const [coverImage, setCoverImage] = useState<File | null>(null)
     const [uploading, setUploading] = useState(false)
-    const { theme, setTheme } = useTheme()
 
     async function handleUpload() {
         if (!songFile) {
@@ -84,14 +79,6 @@ export default function UploadPage() {
             <div className="container mx-auto py-8">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold tracking-tight">Upload Music Track</h1>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                    >
-                        <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                        <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    </Button>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
