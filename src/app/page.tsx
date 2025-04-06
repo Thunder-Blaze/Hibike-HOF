@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 import contractABI from '../contract_data/GetSet.json'
 import contractAddress from '../contract_data/GetSet-address.json'
-import { Search, Play } from 'lucide-react'
+import { Search, Play, MoreVertical } from 'lucide-react'
 import { MusicCard } from '@/components/music/MusicCard'
 import Image from 'next/image'
+import { Header } from '@/components/layout/Header'
 
 export default function HomePage() {
     const [value, setValue] = useState('')
@@ -134,73 +135,80 @@ export default function HomePage() {
     }, [])
 
     return (
-        <main className="container mx-auto px-4 py-8">
-            <div className="mb-8 space-y-4">
-                <h1 className="text-4xl font-bold">Welcome!</h1>
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                        type="search"
-                        placeholder="Search music, album..."
-                        className="w-full rounded-full bg-muted px-10 py-2 text-sm"
-                    />
-                </div>
-            </div>
-
-            <section className="mb-8">
-                <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-2xl font-semibold">Music Trending</h2>
-                    <button className="text-sm text-muted-foreground hover:text-primary">
-                        Show more
-                    </button>
-                </div>
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                    {trendingMusic.map((music) => (
-                        <MusicCard key={music.id} {...music} />
-                    ))}
-                </div>
-            </section>
-
-            <section>
-                <div className="mb-4">
-                    <div className="flex space-x-4 text-sm">
-                        <button className="font-medium text-primary">Recently</button>
-                        <button className="text-muted-foreground hover:text-primary">
-                            Popular
-                        </button>
-                        <button className="text-muted-foreground hover:text-primary">
-                            Similar
-                        </button>
+        <>
+            <Header title="Discover" />
+            <main className="container mx-auto px-4 pt-24 pb-8">
+                <div className="mb-8 space-y-4">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                        <input
+                            type="search"
+                            placeholder="Search music, album..."
+                            className="w-full rounded-full bg-muted px-10 py-2 text-sm"
+                        />
                     </div>
                 </div>
-                <div className="space-y-4">
-                    {recentlyPlayed.map((music) => (
-                        <div
-                            key={music.id}
-                            className="flex items-center gap-4 rounded-xl bg-card p-3 hover:bg-accent"
-                        >
-                            <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
-                                <Image
-                                    src={music.coverUrl}
-                                    alt={music.title}
-                                    width={48}
-                                    height={48}
-                                    className="object-cover"
-                                />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <h3 className="truncate font-medium">{music.title}</h3>
-                                <p className="truncate text-sm text-muted-foreground">
-                                    {music.artist}
-                                </p>
-                            </div>
-                            <button className="flex-shrink-0 rounded-full bg-primary p-2">
-                                <Play className="h-4 w-4 text-primary-foreground" />
+
+                <section className="mb-8">
+                    <div className="mb-4 flex items-center justify-between">
+                        <h2 className="text-2xl font-semibold">Music Trending</h2>
+                        <button className="text-sm text-muted-foreground hover:text-primary">
+                            Show more
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                        {trendingMusic.map((music) => (
+                            <MusicCard key={music.id} {...music} />
+                        ))}
+                    </div>
+                </section>
+
+                <section>
+                    <div className="mb-4">
+                        <div className="flex space-x-4 text-sm">
+                            <button className="font-medium text-primary">Recently</button>
+                            <button className="text-muted-foreground hover:text-primary">
+                                Popular
+                            </button>
+                            <button className="text-muted-foreground hover:text-primary">
+                                Similar
                             </button>
                         </div>
-                    ))}
-                </div>
-            </section>
-        </main>
+                    </div>
+                    <div className="space-y-4">
+                        {recentlyPlayed.map((music) => (
+                            <div
+                                key={music.id}
+                                className="flex items-center gap-4 rounded-xl bg-card p-3 hover:bg-accent"
+                            >
+                                <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
+                                    <Image
+                                        src={music.coverUrl}
+                                        alt={music.title}
+                                        width={48}
+                                        height={48}
+                                        className="object-cover"
+                                    />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="truncate font-medium">{music.title}</h3>
+                                    <p className="truncate text-sm text-muted-foreground">
+                                        {music.artist}
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button className="rounded-full p-2 hover:bg-background">
+                                        <Play className="h-4 w-4" />
+                                    </button>
+                                    <button className="rounded-full p-2 hover:bg-background">
+                                        <MoreVertical className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            </main>
+        </>
     )
 }
