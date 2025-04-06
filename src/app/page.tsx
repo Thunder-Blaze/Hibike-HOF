@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 import contractABI from '../contract_data/GetSet.json'
 import contractAddress from '../contract_data/GetSet-address.json'
+import { Search, Play } from 'lucide-react'
+import { MusicCard } from '@/components/music/MusicCard'
+import Image from 'next/image'
 
-export default function Page() {
+export default function HomePage() {
     const [value, setValue] = useState('')
     const [retrievedValue, setRetrievedValue] = useState(null)
     const [account, setAccount] = useState(null)
@@ -16,6 +19,36 @@ export default function Page() {
     const [contract, setContract] = useState<ethers.Contract | null>(null)
     const [depositAmount, setDepositAmount] = useState('')
     const [userBalance, setUserBalance] = useState<string | null>(null)
+
+    const trendingMusic = [
+        {
+            id: '1',
+            title: 'On the ground',
+            artist: 'Rose',
+            coverUrl: '/images/winter.jpg',
+        },
+        {
+            id: '2',
+            title: 'Stay',
+            artist: 'Justin Bieber',
+            coverUrl: '/images/stay.jpg',
+        },
+    ]
+
+    const recentlyPlayed = [
+        {
+            id: '3',
+            title: 'Homura',
+            artist: 'Lisa',
+            coverUrl: '/images/homura.jpg',
+        },
+        {
+            id: '4',
+            title: 'All my worst',
+            artist: 'Pink',
+            coverUrl: '/images/worst.jpg',
+        },
+    ]
 
     // Initialize Provider, Signer, and Contract
     const initializeEthers = async () => {
@@ -101,79 +134,73 @@ export default function Page() {
     }, [])
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen">
-            <h1 className="text-2xl font-bold mb-4">GetSet Contract</h1>
+        <main className="container mx-auto px-4 py-8">
+            <div className="mb-8 space-y-4">
+                <h1 className="text-4xl font-bold">Welcome!</h1>
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                        type="search"
+                        placeholder="Search music, album..."
+                        className="w-full rounded-full bg-muted px-10 py-2 text-sm"
+                    />
+                </div>
+            </div>
 
-            {/* Wallet Connection */}
-            {account ? (
-                <p className="mb-4">Connected: {account}</p>
-            ) : (
-                <button
-                    onClick={initializeEthers}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md mb-4"
-                >
-                    Connect Wallet
-                </button>
-            )}
+            <section className="mb-8">
+                <div className="mb-4 flex items-center justify-between">
+                    <h2 className="text-2xl font-semibold">Music Trending</h2>
+                    <button className="text-sm text-muted-foreground hover:text-primary">
+                        Show more
+                    </button>
+                </div>
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                    {trendingMusic.map((music) => (
+                        <MusicCard key={music.id} {...music} />
+                    ))}
+                </div>
+            </section>
 
-            {/* Input Field for Setting Value */}
-            <input
-                type="number"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder="Enter value"
-                className="border px-4 py-2 mb-4"
-            />
-            <button
-                onClick={setContractValue}
-                className="px-4 py-2 bg-green-600 text-white rounded-md mb-4"
-            >
-                Set Value
-            </button>
-
-            {/* Get Value Button */}
-            <button
-                onClick={getContractValue}
-                className="px-4 py-2 bg-purple-600 text-white rounded-md mb-4"
-            >
-                Get Value
-            </button>
-
-            {/* Display Retrieved Value */}
-            {retrievedValue !== null && (
-                <p className="text-lg font-bold">
-                    Stored Value: {retrievedValue}
-                </p>
-            )}
-
-            {/* Deposit Funds */}
-            <input
-                type="text"
-                value={depositAmount}
-                onChange={(e) => setDepositAmount(e.target.value)}
-                placeholder="Enter ETH to deposit"
-                className="border px-4 py-2 mb-4"
-            />
-            <button
-                onClick={depositFunds}
-                className="px-4 py-2 bg-yellow-600 text-white rounded-md mb-4"
-            >
-                Deposit Funds
-            </button>
-
-            {/* Get User Balance */}
-            <button
-                onClick={getUserBalance}
-                className="px-4 py-2 bg-red-600 text-white rounded-md mb-4"
-            >
-                Get Balance
-            </button>
-
-            {userBalance !== null && (
-                <p className="text-lg font-bold">
-                    Your Balance: {userBalance} ETH
-                </p>
-            )}
-        </div>
+            <section>
+                <div className="mb-4">
+                    <div className="flex space-x-4 text-sm">
+                        <button className="font-medium text-primary">Recently</button>
+                        <button className="text-muted-foreground hover:text-primary">
+                            Popular
+                        </button>
+                        <button className="text-muted-foreground hover:text-primary">
+                            Similar
+                        </button>
+                    </div>
+                </div>
+                <div className="space-y-4">
+                    {recentlyPlayed.map((music) => (
+                        <div
+                            key={music.id}
+                            className="flex items-center gap-4 rounded-xl bg-card p-3 hover:bg-accent"
+                        >
+                            <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
+                                <Image
+                                    src={music.coverUrl}
+                                    alt={music.title}
+                                    width={48}
+                                    height={48}
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h3 className="truncate font-medium">{music.title}</h3>
+                                <p className="truncate text-sm text-muted-foreground">
+                                    {music.artist}
+                                </p>
+                            </div>
+                            <button className="flex-shrink-0 rounded-full bg-primary p-2">
+                                <Play className="h-4 w-4 text-primary-foreground" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </section>
+        </main>
     )
 }
