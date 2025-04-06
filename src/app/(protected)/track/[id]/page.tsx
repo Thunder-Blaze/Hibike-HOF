@@ -1,17 +1,51 @@
+'use client'
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+
 interface Props {
     params: { id: string };
   }
+
+interface Track {
+    id: string;
+    title: string;
+    artistName: string;
+    audioUrl: string;
+  }
   
-  export default async function TrackPage({ params }: Props) {
-    const res = await fetch(`https://gateway.pinata.cloud/ipfs/${params.id}`);
-    const track = await res.json();
+  export default function TrackPage() {
+    const params = useParams();
+    const [track, setTrack] = useState<Track | null>(null);
+
+    useEffect(() => {
+      async function fetchTrack() {
+        const res = await fetch(`https://apricot-abstract-swordfish-756.mypinata.cloud/ipfs/${params.id}/metadata.json`);
+        if (!res.ok) {
+          throw new Error("Failed to fetch track");
+        }
+        const data = await res.json();
+        setTrack(data);
+      }
+      fetchTrack();
+    }, [params.id]);
   
     return (
-      <main className="max-w-2xl mx-auto p-6 space-y-4">
-        <h1 className="text-2xl font-bold">{track.title}</h1>
-        <p className="text-gray-500">by <a href={`/artist/${track.artistAddress}`} className="text-blue-500">{track.artistName}</a></p>
-        <audio controls src={track.audioUrl} className="w-full mt-4" />
-      </main>
+      <>
+        {track ? (
+          <div className="max-w-xl mx-auto p-4 space-y-4">
+            <h1 className="text-xl font-bold">{track.title}</h1>
+            <p className="text-gray-600">Artist: {track.artistName}</p>
+            <audio
+              controls
+              src={`https://apricot-abstract-swordfish-756.mypinata.cloud/ipfs/${params.id}/song.mp3`}
+              className="w-full"
+            />
+          </div>
+        ) : (
+          <div>Loading...</div>
+        )}
+      </>
     );
+    
   }
   

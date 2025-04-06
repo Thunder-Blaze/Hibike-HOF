@@ -1,12 +1,23 @@
-import axios from "axios";
+'use server';
 
-const PINATA_JWT = process.env.PINATA_JWT;
+import fs from 'fs';
+import path from 'path';
+import PinataClient from '@pinata/sdk';
 
-export async function uploadJsonToIPFS(data: any) {
-  const res = await axios.post("https://api.pinata.cloud/pinning/pinJSONToIPFS", data, {
-    headers: {
-      Authorization: `Bearer ${PINATA_JWT}`,
-    },
-  });
-  return `https://gateway.pinata.cloud/ipfs/${res.data.IpfsHash}`;
+const pinata = new PinataClient({
+  pinataJWTKey: process.env.JWT_SECRET_TOKEN!,
+});
+
+export async function uploadFolderToIPFS(folderPath: string) {
+  const folderName = path.basename(folderPath);
+
+  try {
+    const result = await pinata.pinFromFS(folderPath);
+
+    console.log('✅ Uploaded folder to IPFS:', result);
+    return result; // contains IpfsHash, PinSize, Timestamp
+  } catch (error) {
+    console.error('❌ Upload to IPFS failed:', error);
+    throw error;
+  }
 }

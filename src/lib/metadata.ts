@@ -2,8 +2,14 @@ export interface TrackMetadata {
     title: string;
     artistName: string;
     artistAddress: string;
-    audioUrl: string;
+    // audioUrl: string;
     coverImageUrl?: string;
+    skinImageUrl?: string;
+    colorArray?: string[];
+    description?: string;
+    anime?: string;
+    genres?: string[];
+    tags?: string[];
   }
   
   export function createMetadata(meta: TrackMetadata) {

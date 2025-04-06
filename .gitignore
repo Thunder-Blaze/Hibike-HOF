@@ -12,7 +12,7 @@
 bun.lock
 # testing
 /coverage
-
+/artifacts
 # next.js
 /.next/
 /out/

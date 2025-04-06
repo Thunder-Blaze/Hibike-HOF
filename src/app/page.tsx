@@ -9,11 +9,11 @@ export default function Page() {
   const [value, setValue] = useState(""); 
   const [retrievedValue, setRetrievedValue] = useState(null);
   const [account, setAccount] = useState(null);
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
-  const [contract, setContract] = useState(null);
+  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
+  const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
+  const [contract, setContract] = useState<ethers.Contract | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
-  const [userBalance, setUserBalance] = useState(null);
+  const [userBalance, setUserBalance] = useState<string | null>(null);
 
   // Initialize Provider, Signer, and Contract
   const initializeEthers = async () => {
@@ -65,11 +65,11 @@ export default function Page() {
   const depositFunds = async () => {
     if (!contract) return alert("Please connect wallet first!");
     try {
-      const tx = await signer.sendTransaction({
+      const tx = await signer?.sendTransaction({
         to: contractAddress.address,
         value: ethers.parseEther(depositAmount), // Convert to wei
       });
-      await tx.wait();
+      await tx?.wait();
       alert(`Deposited ${depositAmount} ETH successfully!`);
       setDepositAmount("");
     } catch (error) {
